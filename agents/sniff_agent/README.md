@@ -1,0 +1,1 @@
+SniffAgent passively captures ARP and DNS packets on the configured network interface and publishes structured `net.arp` and `net.dns` events through the shared EventBus; interface and capture failures are logged and published as `agent.error` events, with retries for transient capture failures.

@@ -1,0 +1,37 @@
+[agent]
+name = "sniff_agent"
+version = "0.1.0"
+purpose = "Passively capture ARP and DNS traffic on a configured network interface and publish structured events."
+
+[inputs]
+events = []
+devices = ["enp0s31f6"]
+files = ["config.toml"]
+
+[outputs]
+events = ["net.arp", "net.dns", "agent.health", "agent.error"]
+files = []
+
+[interfaces]
+drivers = []
+libs = ["scapy"]
+external_apis = []
+
+[config]
+iface = { type = "string", default = "enp0s31f6", desc = "Network interface to capture packets from." }
+bpf = { type = "string", default = "arp or udp port 53", desc = "BPF filter selecting ARP and DNS traffic." }
+publish_arp = { type = "bool", default = true, desc = "Whether to publish parsed ARP packets." }
+publish_dns = { type = "bool", default = true, desc = "Whether to publish parsed DNS questions." }
+
+[failure_modes]
+scapy_import = "Publish agent.error and exit cleanly."
+interface_missing = "Publish agent.error and retry after 30 seconds."
+permission_denied = "Publish agent.error and retry after 60 seconds."
+
+[examples]
+arp = { in = "ARP who-has 192.168.100.1 tell 192.168.100.14", out = "net.arp {op:1, psrc:\"192.168.100.14\", pdst:\"192.168.100.1\", hwsrc:\"54:bf:64:8d:08:61\", hwdst:\"00:00:00:00:00:00\"}" }
+dns = { in = "DNS query gitee.com", out = "net.dns {qname:\"gitee.com.\", qtype:1, src:\"192.168.100.14\"}" }
+
+[limits]
+ethics_notes = "none"
+known_constraints = ["requires CAP_NET_RAW"]

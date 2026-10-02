@@ -1,0 +1,44 @@
+[agent]
+name = "github_agent"
+version = "0.1.0"
+purpose = "Fetch recent and trending GitHub and Chinese technology items, translate locally to Arabic, rank by user interests, and publish intelligence events."
+
+[inputs]
+events = []
+devices = []
+files = ["config.toml", "interests.toml"]
+
+[outputs]
+events = ["intel.item", "intel.batch", "agent.health", "agent.error"]
+files = ["~/.cache/rasool/github_agent/queue.sqlite", "~/.cache/rasool/github_agent/seen.json"]
+
+[interfaces]
+drivers = []
+libs = ["httpx", "feedparser (optional)", "argostranslate (optional)", "tomllib"]
+external_apis = ["github.com", "gitee.com", "blog.csdn.net", "juejin.cn", "zhihu.com", "api.bilibili.com", "127.0.0.1:11434 (local Ollama only)"]
+
+[config]
+interval_minutes = { type = "integer", default = 60, desc = "Minutes between source collection cycles." }
+enabled = { type = "array[string]", default = ["github_trending", "github_releases", "gitee_explore", "csdn_ai", "juejin_frontend", "zhihu_hot", "bilibili_rank"], desc = "Sources polled on each collection cycle." }
+watch_repos = { type = "array[string]", default = [], desc = "GitHub owner/repository names whose release feeds are polled." }
+ollama_url = { type = "string", default = "http://127.0.0.1:11434", desc = "Local Ollama server URL; translation requests stay on localhost." }
+model = { type = "string", default = "qwen2.5:3b", desc = "Preferred local Ollama translation model." }
+fallback_model = { type = "string", default = "qwen2.5:1.5b", desc = "Fallback local model when the preferred model is unavailable." }
+ollama_timeout_s = { type = "integer", default = 30, desc = "Timeout in seconds for each local Ollama request." }
+retry_interval_s = { type = "integer", default = 300, desc = "Seconds between queued translation retries." }
+seen_ttl_days = { type = "integer", default = 30, desc = "Days to retain URL hashes for deduplication." }
+interests_file = { type = "string", default = "~/.config/rasool/github_agent/interests.toml", desc = "Optional user-maintained weighted keyword list." }
+
+[failure_modes]
+source_http = "Publish agent.error for the failed source and continue polling other sources."
+local_translation = "Try the configured local Ollama models, then local Argos Translate; queue untranslated items and retry."
+malformed_source = "Publish agent.error with the source name and continue with other sources."
+httpx_missing = "Publish agent.error for each source request and retry on the next scheduled collection cycle."
+
+[examples]
+github_trending = { in = "user/llm-tools repository with an English description", out = "intel.item with Arabic title and summary, source URL, interest score and tags" }
+csdn_article = { in = "Chinese CSDN article about deploying Ollama locally", out = "intel.item with locally translated Arabic title and summary and raw_lang set to zh" }
+
+[limits]
+translation = "Local Ollama and optional local Argos Translate only; no cloud translation service."
+known_constraints = ["httpx must be installed in the runtime environment", "Ollama must have a local translation model available for immediate translation"]

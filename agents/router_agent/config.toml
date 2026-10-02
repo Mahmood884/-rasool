@@ -1,0 +1,35 @@
+[router]
+base_url = "http://192.168.100.1"
+username = "root"
+password_file = "~/.config/rasool/router_agent/password"
+extra_fields = { Language = "english" }
+token_field = "x.X_HW_Token"
+
+[endpoints]
+login = "/login.cgi"
+random_count = "/asp/GetRandCount.asp"
+clients = "/html/ssmp/deviceinfo/deviceinfo.asp"
+status = "/html/status/deviceinfo.asp"
+username_field = "UserName"
+password_field = "PassWord"
+
+[schedule]
+poll_interval_s = 300
+
+[storage]
+cache_dir = "~/.cache/rasool/router_agent"
+
+[known]
+"20:43:a8:e5:01:54" = "esp32-rasool-node"
+"54:bf:64:8d:08:61" = "omarchy-workstation"
+
+[cameras]
+ips = [
+    "192.168.100.2",
+    "192.168.100.3",
+    "192.168.100.4",
+    "192.168.100.5",
+    "192.168.100.8",
+    "192.168.100.11",
+    "192.168.100.149",
+]

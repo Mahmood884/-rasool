@@ -1,0 +1,42 @@
+[schedule]
+interval_minutes = 60
+
+[sources]
+enabled = [
+    "github_trending",
+    "github_releases",
+    "csdn_ai",
+]
+# gitee_explore: 405 as of 2026-10-01; revisit
+# juejin_frontend: SPA; needs API endpoint (todo)
+# zhihu_hot: 403 without cookies; revisit
+# bilibili_rank: needs wbi signature; revisit
+
+[watch]
+repos = []
+
+[translation]
+ollama_url = "http://127.0.0.1:11434"
+model = "qwen2.5:3b"
+fallback_model = "qwen2.5:1.5b"
+ollama_timeout_s = 30
+retry_interval_s = 300
+deepseek_enabled = true
+deepseek_url = "https://api.deepseek.com/chat/completions"
+deepseek_model = "deepseek-chat"
+deepseek_token_file = "~/.config/rasool/github_agent/deepseek_token"
+deepseek_timeout_s = 30
+deepseek_temperature = 0.2
+deepseek_max_tokens = 2048
+deepseek_system_prompt = "Translate the user's text into Arabic accurately. Preserve product names, repository identifiers, URLs, code, and technical terms. Do not add facts or commentary. Return only the translation."
+
+[dedup]
+seen_ttl_days = 30
+
+[storage]
+cache_dir = "~/.cache/rasool/github_agent"
+interests_file = "~/.config/rasool/github_agent/interests.toml"
+
+[http]
+timeout_s = 20
+user_agent = "RasoolGitHubAgent/0.1.0"

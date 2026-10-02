@@ -1,0 +1,4 @@
+iface = "enp0s31f6"
+bpf = "arp or udp port 53"
+publish_arp = true
+publish_dns = true

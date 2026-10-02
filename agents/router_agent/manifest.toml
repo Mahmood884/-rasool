@@ -1,0 +1,43 @@
+[agent]
+name = "router_agent"
+version = "0.1.0"
+purpose = "Poll the configured HG8245W5 router for connected clients, identify known and newly observed devices, and publish router events."
+
+[inputs]
+events = []
+devices = ["192.168.100.1"]
+files = ["config.toml", "known_devices.json"]
+
+[outputs]
+events = ["router.client", "router.unknown", "router.session", "agent.health", "agent.error"]
+files = ["~/.cache/rasool/router_agent/known_devices.json"]
+
+[interfaces]
+drivers = []
+libs = ["httpx (optional at runtime)", "html.parser", "tomllib"]
+external_apis = ["192.168.100.1"]
+
+[config]
+base_url = { type = "string", default = "http://192.168.100.1", desc = "HG8245W5 router web interface." }
+username = { type = "string", default = "root", desc = "Router web UI login user." }
+password_file = { type = "string", default = "~/.config/rasool/router_agent/password", desc = "Protected router password file; never store the password here." }
+timeout_s = { type = "integer", default = 20, desc = "HTTP request timeout in seconds." }
+login = { type = "string", default = "/login.cgi", desc = "Router login endpoint." }
+clients = { type = "string", default = "/html/ssmp/deviceinfo/deviceinfo.asp", desc = "Connected-client table endpoint." }
+status = { type = "string", default = "/html/status/deviceinfo.asp", desc = "Router status and uptime endpoint." }
+poll_interval_s = { type = "integer", default = 300, desc = "Seconds between client-list polls." }
+cache_dir = { type = "string", default = "~/.cache/rasool/router_agent", desc = "Directory for persistent known-device observations." }
+
+[failure_modes]
+login_rejected = "Publish agent.error and retry login after 60 seconds."
+connection_refused = "Publish agent.error and retry after 30 seconds."
+session_expired = "Re-authenticate and resume polling without emitting a session-expiry event."
+malformed_client_table = "Publish agent.error with a response snippet and skip that polling cycle."
+malformed_mac = "Log the row parsing failure and continue with other rows."
+httpx_missing = "Publish agent.error and retry on the next scheduled poll."
+
+[examples]
+client = { in = "MAC a4:2b:b0:12:34:56, IP 192.168.100.42, hostname Android-9", out = "router.client with MAC, IP, hostname, interface, first_seen and last_seen; router.unknown is also emitted for a newly observed MAC" }
+
+[limits]
+known_constraints = ["Router login field names and HTML tables are configurable only where represented in config.toml", "known_devices.json stores observed MAC addresses locally"]

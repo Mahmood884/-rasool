@@ -1,0 +1,29 @@
+[runtime]
+enabled_agents = ["sniff_agent", "github_agent", "router_agent"]
+start_stagger_s = 10
+idle_stagger_s  = 30
+stop_stagger_s  = 2
+
+[thermal]
+warn_below_throttle = 70.0
+throttle_at         = 78.0
+suspend_at          = 85.0
+emergency_at        = 92.0
+recover_below       = 60.0
+poll_interval_s     = 5.0
+
+[safety]
+allowlist = [
+    "agent.error",
+    "agent.health",
+    "intel.batch",
+    "intel.item",
+    "net.arp",
+    "net.dns",
+    "router.client",
+    "router.session",
+    "router.unknown",
+]
+
+[intel_feed]
+path = "~/.cache/rasool/intel_feed.sqlite"
